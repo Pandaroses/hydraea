@@ -1,0 +1,13 @@
+/home/gsh/proj/ml/testering/target/debug/deps/rgb-e523805850363c67.rmeta: /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/lib.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/convert/mod.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/convert/array.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/convert/tuple.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/ops.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/pixel.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/rgb.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/rgba.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/alt.rs
+
+/home/gsh/proj/ml/testering/target/debug/deps/rgb-e523805850363c67.d: /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/lib.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/convert/mod.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/convert/array.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/convert/tuple.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/ops.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/pixel.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/rgb.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/rgba.rs /home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/alt.rs
+
+/home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/lib.rs:
+/home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/convert/mod.rs:
+/home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/convert/array.rs:
+/home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/convert/tuple.rs:
+/home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/ops.rs:
+/home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/pixel.rs:
+/home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/rgb.rs:
+/home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/internal/rgba.rs:
+/home/gsh/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rgb-0.8.36/src/alt.rs:
