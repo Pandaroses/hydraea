@@ -1,7 +1,9 @@
-use layout::format_json;
+use layout::format_json_kle;
+use layout::Keyboard;
 use serde::{Deserialize, Serialize};
 fn main() {
-    format_json("/home/gsh/proj/ml/layout/files/normal.json".to_string());
+    let meow: Keyboard = format_json_kle("/home/gsh/proj/ml/layout/files/split.json".to_string());
+    // println!("{:?}", meow);
     let mut words: Vec<String> = init();
 }
 
