@@ -1,11 +1,12 @@
+use nanoid::nanoid;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{default, fs::read_to_string};
-
 #[derive(Debug)]
 pub struct Key {
-    x: f32,
-    y: f32,
+    pub x: f32,
+    pub y: f32,
+    pub id: String,
 }
 impl Default for Key {
     fn default() -> Key {
@@ -14,7 +15,7 @@ impl Default for Key {
 }
 #[derive(Debug)]
 pub struct Keyboard {
-    layers: Vec<Layer>,
+    pub layers: Vec<Layer>,
 }
 #[derive(Debug)]
 struct Index {
@@ -103,6 +104,7 @@ pub fn format_json_kle(path: String) -> Keyboard {
                         (current.x + current.x2.unwrap_or(1.0) + (current.w2.unwrap_or(1.0) / 2.0)),
                         (current.y + current.y2.unwrap_or(1.0) + (current.h2.unwrap_or(1.0) / 2.0)),
                     );
+                    let i = nanoid!(10);
                     if (current.x2.is_some()
                         | current.y2.is_some()
                         | current.w2.is_some()
@@ -111,11 +113,13 @@ pub fn format_json_kle(path: String) -> Keyboard {
                         keyboard.push(Key {
                             x: ex2 as f32,
                             y: ey2 as f32,
+                            id: i.to_string(),
                         });
                     }
                     keyboard.push(Key {
                         x: ex as f32,
                         y: ey as f32,
+                        id: i,
                     });
                     current.w = 1.0;
                     current.h = 1.0;
