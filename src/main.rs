@@ -1,5 +1,5 @@
 use layout::format_json_kle;
-use layout::Keyboard;
+use layout::{Keyboard, Keycode};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 fn main() {
@@ -18,18 +18,10 @@ fn init() -> Vec<String> {
     return words;
 }
 // i have to change this function to make it work with layers aswell but idk hojw to do it
-fn distance(keys: layout::Layer) -> HashMap<String, f32> {
-    let mut fart = HashMap::new();
-    for i in 0..keys.len() {
-        for x in 0..keys.len() {
-            let label: String = (keys[i].id.to_owned() + &keys[x].id.to_owned()).into();
-            let dist: f32 =
-                ((keys[x].x - keys[i].x).powi(2) + (keys[x].y - keys[i].y).powi(2)).sqrt();
-            fart.insert(label, dist);
-        }
-    }
+fn distance(keys: layout::Layer, layers: i32) -> HashMap<(Keycode, Keycode), f32> {
+    let mut res: HashMap<(Keycode, Keycode), f32> = HashMap::new();
 
-    return fart;
+    return todo!();
 }
 
 // how the fuck do layer keys must work

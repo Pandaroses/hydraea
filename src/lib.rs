@@ -144,3 +144,5 @@ pub fn format_json_kle(path: String) -> Keyboard {
     r.push(keyboard);
     return Keyboard { layers: r };
 }
+
+pub type Keycode = (String, [char; 2]);
