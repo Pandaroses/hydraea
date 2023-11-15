@@ -1,12 +1,13 @@
 use nanoid::nanoid;
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::{default, fs::read_to_string};
+use std::fs::read_to_string;
 #[derive(Debug)]
 pub struct Key {
     pub x: f32,
     pub y: f32,
     pub id: String,
+    pub value: Option<Keycode>,
+    pub fixed: bool,
 }
 impl Default for Key {
     fn default() -> Key {
@@ -66,8 +67,7 @@ pub type Layer = Vec<Key>;
 
 pub fn format_json_kle(path: String) -> Keyboard {
     let mut keyboard: Layer = Layer::new();
-    let meow: Vec<Value> =
-        serde_json::from_str(&read_to_string(path.to_string()).unwrap()).unwrap();
+    let meow: Vec<Value> = serde_json::from_str(&read_to_string(&path).unwrap()).unwrap();
     let mut current: Index = Index::default();
     for i in 0..meow.len() {
         let mrrow = meow[i].as_array().unwrap();
@@ -94,32 +94,36 @@ pub fn format_json_kle(path: String) -> Keyboard {
                         (current.y + (current.h / 2.0)),
                     );
                     println!("{:?} , {:?}", mrrow[r].as_str().unwrap(), (ex, ey));
-                    let (mut dx, mut dy) = (current.rx, current.ry);
+                    let (dx, dy) = (current.rx, current.ry);
                     (ex, ey) = (ex - dx, -(ey - dy));
                     ex = ex * f64::cos(current.r) - ey * f64::sin(current.r);
                     ey = ey * f64::cos(current.r) + ex * f64::sin(current.r);
                     (ex, ey) = (ex + dx, ex + dy);
                     current.x += current.w;
-                    let (mut ex2, mut ey2) = (
+                    let (ex2, ey2) = (
                         (current.x + current.x2.unwrap_or(1.0) + (current.w2.unwrap_or(1.0) / 2.0)),
                         (current.y + current.y2.unwrap_or(1.0) + (current.h2.unwrap_or(1.0) / 2.0)),
                     );
-                    let i = nanoid!(10);
-                    if (current.x2.is_some()
+                    let i = nanoid!(5);
+                    if current.x2.is_some()
                         | current.y2.is_some()
                         | current.w2.is_some()
-                        | current.h2.is_some())
+                        | current.h2.is_some()
                     {
                         keyboard.push(Key {
                             x: ex2 as f32,
                             y: ey2 as f32,
                             id: i.to_string(),
+                            value: None,
+                            fixed: false,
                         });
                     }
                     keyboard.push(Key {
                         x: ex as f32,
                         y: ey as f32,
                         id: i,
+                        value: None,
+                        fixed: false,
                     });
                     current.w = 1.0;
                     current.h = 1.0;
@@ -136,13 +140,29 @@ pub fn format_json_kle(path: String) -> Keyboard {
         };
     }
 
-    //
-    //
-    //
-
     let mut r: Vec<Layer> = Vec::new();
     r.push(keyboard);
-    return Keyboard { layers: r };
+    Keyboard { layers: r }
 }
 
-pub type Keycode = (String, [char; 2]);
+#[derive(Debug)]
+pub enum Keycode {
+    KC(String, String),
+    DF(i32),
+    MO(i32),
+    OSL(i32),
+    TG(i32),
+}
+
+pub fn default_keycodes() -> Vec<Keycode> {
+    let meow: String =
+        "aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ1!2@3#4$5%6^7&8*9(0)".to_string();
+    let mut res = Vec::new();
+    for i in 0..(meow.len() / 2) {
+        res.push(Keycode::KC(
+            String::from(meow.chars().nth(i).unwrap()),
+            String::from(meow.chars().nth(i + 1).unwrap()),
+        ));
+    }
+    return res;
+}
