@@ -1,7 +1,8 @@
 use nanoid::nanoid;
 use serde_json::Value;
 use std::fs::read_to_string;
-#[derive(Debug)]
+pub mod genes;
+#[derive(Debug, Clone)]
 pub struct Key {
     pub x: f32,
     pub y: f32,
@@ -93,7 +94,6 @@ pub fn format_json_kle(path: String) -> Keyboard {
                         (current.x + (current.w / 2.0)),
                         (current.y + (current.h / 2.0)),
                     );
-                    println!("{:?} , {:?}", mrrow[r].as_str().unwrap(), (ex, ey));
                     let (dx, dy) = (current.rx, current.ry);
                     (ex, ey) = (ex - dx, -(ey - dy));
                     ex = ex * f64::cos(current.r) - ey * f64::sin(current.r);
@@ -114,7 +114,10 @@ pub fn format_json_kle(path: String) -> Keyboard {
                             x: ex2 as f32,
                             y: ey2 as f32,
                             id: i.to_string(),
-                            value: None,
+                            value: Some(Keycode::KC([
+                                mrrow[r].as_str().unwrap().to_string().to_lowercase(),
+                                mrrow[r].as_str().unwrap().to_string().to_lowercase(),
+                            ])),
                             fixed: false,
                         });
                     }
@@ -122,7 +125,10 @@ pub fn format_json_kle(path: String) -> Keyboard {
                         x: ex as f32,
                         y: ey as f32,
                         id: i,
-                        value: None,
+                        value: Some(Keycode::KC([
+                            mrrow[r].as_str().unwrap().to_string().to_lowercase(),
+                            mrrow[r].as_str().unwrap().to_string().to_lowercase(),
+                        ])),
                         fixed: false,
                     });
                     current.w = 1.0;
@@ -145,9 +151,9 @@ pub fn format_json_kle(path: String) -> Keyboard {
     Keyboard { layers: r }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum Keycode {
-    KC(String, String),
+    KC([String; 2]),
     DF(i32),
     MO(i32),
     OSL(i32),
@@ -159,10 +165,10 @@ pub fn default_keycodes() -> Vec<Keycode> {
         "aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ1!2@3#4$5%6^7&8*9(0)".to_string();
     let mut res = Vec::new();
     for i in 0..(meow.len() / 2) {
-        res.push(Keycode::KC(
+        res.push(Keycode::KC([
             String::from(meow.chars().nth(i).unwrap()),
             String::from(meow.chars().nth(i + 1).unwrap()),
-        ));
+        ]));
     }
     return res;
 }
