@@ -2,7 +2,7 @@ use nanoid::nanoid;
 use serde_json::Value;
 use std::fs::read_to_string;
 pub mod genes;
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Key {
     pub x: f32,
     pub y: f32,
@@ -10,12 +10,7 @@ pub struct Key {
     pub value: Option<Keycode>,
     pub fixed: bool,
 }
-impl Default for Key {
-    fn default() -> Key {
-        todo!();
-    }
-}
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Keyboard {
     pub layers: Vec<Layer>,
 }
