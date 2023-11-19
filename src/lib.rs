@@ -2,7 +2,7 @@ use nanoid::nanoid;
 use serde_json::Value;
 use std::fs::read_to_string;
 pub mod genes;
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct Key {
     pub x: f32,
     pub y: f32,
@@ -146,7 +146,7 @@ pub fn format_json_kle(path: String) -> Keyboard {
     Keyboard { layers: r }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash, PartialOrd, Ord)]
 pub enum Keycode {
     KC([String; 2]),
     DF(i32),
