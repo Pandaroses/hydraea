@@ -35,17 +35,24 @@ pub fn mate(a: Individual, b: Individual) -> Individual {
             missing_keycodes.push(b.chromosomes.layers[layer][key].value.clone());
         }
         for key in 0..res_keyboard.layers[layer].len() {
+            res_keyboard.layers[layer].iter().for_each(|m| {
+                if missing_keycodes.contains(&m.value) {
+                    println!("duplicate missing, {:?}", m);
+                    let remove = missing_keycodes.iter().position(|f| f == &m.value).unwrap();
+                    missing_keycodes.remove(remove);
+                }
+            });
             let mut rand = rand::thread_rng();
             if res_keyboard.layers[layer][key].value == None {
                 let pos = rand.gen_range(0..missing_keycodes.len());
                 res_keyboard.layers[layer][key].value = missing_keycodes[pos].clone();
                 missing_keycodes.remove(pos);
-            } else if res_keyboard.layers[layer]
+            } else if (res_keyboard.layers[layer]
                 .clone()
                 .into_iter()
                 .filter(|i| i.value == res_keyboard.layers[layer][key].value.clone())
-                .count()
-                >= 1
+                .count())
+                > 1
             {
                 let meow: Vec<Key> = res_keyboard.layers[layer]
                     .clone()
@@ -58,17 +65,20 @@ pub fn mate(a: Individual, b: Individual) -> Individual {
                         }
                     })
                     .collect();
-                let positions: Vec<usize> = meow
+
+                let mut positions: Vec<usize> = meow
                     .iter()
-                    // figure out how to fix this
-                    .map(|i| res_keyboard.layers.iter().position(|j| i).unwrap())
+                    .filter_map(|i| res_keyboard.layers[layer].iter().position(|j| j.id == i.id))
                     .collect();
-                let pos = rand.gen_range(0..positions.len());
-                let keycode = rand.gen_range(0..missing_keycodes.len());
-                res_keyboard.layers[layer][positions[pos]].value =
-                    missing_keycodes[keycode].clone();
-                missing_keycodes.remove(keycode);
+                let picked = rand.gen_range(0..positions.len());
+                positions.remove(picked);
+                positions.iter().for_each(|i| {
+                    let removed_pos = rand.gen_range(0..missing_keycodes.len());
+                    res_keyboard.layers[layer][*i].value = missing_keycodes[removed_pos].clone();
+                    missing_keycodes.remove(removed_pos);
+                })
             }
+            println!("{:?}", missing_keycodes.len());
         }
     }
     Individual {
