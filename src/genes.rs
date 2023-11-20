@@ -37,7 +37,6 @@ pub fn mate(a: Individual, b: Individual) -> Individual {
         for key in 0..res_keyboard.layers[layer].len() {
             res_keyboard.layers[layer].iter().for_each(|m| {
                 if missing_keycodes.contains(&m.value) {
-                    println!("duplicate missing, {:?}", m);
                     let remove = missing_keycodes.iter().position(|f| f == &m.value).unwrap();
                     missing_keycodes.remove(remove);
                 }
@@ -53,6 +52,7 @@ pub fn mate(a: Individual, b: Individual) -> Individual {
                 .filter(|i| i.value == res_keyboard.layers[layer][key].value.clone())
                 .count())
                 > 1
+                && missing_keycodes.len() >= 1
             {
                 let meow: Vec<Key> = res_keyboard.layers[layer]
                     .clone()
@@ -78,7 +78,6 @@ pub fn mate(a: Individual, b: Individual) -> Individual {
                     missing_keycodes.remove(removed_pos);
                 })
             }
-            println!("{:?}", missing_keycodes.len());
         }
     }
     Individual {
@@ -126,13 +125,13 @@ impl Individual {
             .collect();
         let layer: usize = 0;
         for word in wordset {
-            let space = self.shortest_distance(
-                layer,
-                vec![&Keycode::KC(["space".to_string(), "space".to_string()])],
-                fingers.clone(),
-            );
-            total_distance += space.1;
-            fingers[space.2] = space.0;
+            // let space = self.shortest_distance(
+            //     layer,
+            //     vec![&Keycode::KC(["space".to_string(), "space".to_string()])],
+            //     fingers.clone(),
+            // );
+            // total_distance += space.1;
+            // fingers[space.2] = space.0;
             word.chars().for_each(|char| {
                 let current_char: Vec<&Keycode> = self
                     .lookup_table
