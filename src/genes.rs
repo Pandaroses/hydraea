@@ -1,16 +1,34 @@
 use crate::{Key, Keyboard, Keycode};
 use rand::{random, seq::SliceRandom, Rng};
 use std::collections::HashMap;
+
 pub struct Population {
     pub individuals: Vec<Individual>,
     pub average_fitness: usize,
     pub best_fitness: usize,
     pub generation: usize,
 }
+
 pub struct Individual {
     pub chromosomes: Keyboard,
     pub fitness: usize,
     pub lookup_table: HashMap<Keycode, usize>,
+}
+
+pub fn new_mate(a: Individual, b: Individual) -> Individual {
+    // replace this with actual all_keycodes because lookup table can be potentially issued
+    let all_keycodes = a.lookup_table;
+    let mut missing_keycodes: Vec<Option<Keycode>> = Vec::new();
+    let mut res: Keyboard;
+
+    for layer in 0..a.chromosomes.layers.len() {
+        let middle = a.chromosomes.layers[layer].len() / 2;
+        let res_layer = a.chromosomes.clone().layers[layer].splice(
+            ..middle,
+            b.chromosomes.layers[layer][middle..].iter().cloned(),
+        );
+    }
+    todo!();
 }
 
 pub fn mate(a: Individual, b: Individual) -> Individual {
@@ -111,6 +129,7 @@ impl Individual {
             self.init_table();
         }
     }
+
     pub fn fitness(&mut self, homerow: Vec<String>, wordset: Vec<String>) {
         //this is the function that calculates how far fingers have to travel to write the wordset
         let mut total_distance = 0;
@@ -164,6 +183,7 @@ impl Individual {
             self.fitness = total_distance as usize;
         }
     }
+
     pub fn shortest_distance(
         &self,
         layer: usize,

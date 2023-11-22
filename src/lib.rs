@@ -2,6 +2,7 @@ use nanoid::nanoid;
 use serde_json::Value;
 use std::fs::read_to_string;
 pub mod genes;
+
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Key {
     pub x: f32,

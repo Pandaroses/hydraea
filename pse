@@ -1,0 +1,22 @@
+
+
+input individual a, individual b
+
+res = first half of a + rest being empty
+
+fill in empty part with second half of b, if key.value already exists in res, keep key.value empty
+
+find all missing key values
+
+fill in remaining empty keys in res with random missing key.values
+
+verify legitimacy of new keyboard
+
+return res
+
+
+
+
+
+
+
