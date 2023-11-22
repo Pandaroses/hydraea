@@ -27,7 +27,7 @@ pub fn mate(a: Individual, b: Individual) -> Individual {
                     .iter()
                     .filter(|i| i.value == b.chromosomes.layers[layer][key].value)
                     .count()
-                    >= 1)
+                    > 1)
             {
                 res_keyboard.layers[layer][key].value =
                     b.chromosomes.layers[layer][key].value.clone();
@@ -80,11 +80,13 @@ pub fn mate(a: Individual, b: Individual) -> Individual {
             }
         }
     }
-    Individual {
+    let mut res = Individual {
         chromosomes: res_keyboard,
         fitness: 0,
         lookup_table: HashMap::new(),
-    }
+    };
+    res.init_table();
+    res
 }
 
 pub fn distance(x1: f32, y1: f32, x2: f32, y2: f32) -> f32 {
@@ -125,13 +127,13 @@ impl Individual {
             .collect();
         let layer: usize = 0;
         for word in wordset {
-            // let space = self.shortest_distance(
-            //     layer,
-            //     vec![&Keycode::KC(["space".to_string(), "space".to_string()])],
-            //     fingers.clone(),
-            // );
-            // total_distance += space.1;
-            // fingers[space.2] = space.0;
+            let space = self.shortest_distance(
+                layer,
+                vec![&Keycode::KC(["space".to_string(), "space".to_string()])],
+                fingers.clone(),
+            );
+            total_distance += space.1;
+            fingers[space.2] = space.0;
             word.chars().for_each(|char| {
                 let current_char: Vec<&Keycode> = self
                     .lookup_table

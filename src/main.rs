@@ -6,8 +6,19 @@ use layout::{
 use std::collections::HashMap;
 //TODO main is not currently functional as intended, everything is hard coded
 fn main() {
-    let meow: Keyboard = format_json_kle("/home/gsh/proj/hydraea/files/corne.json".to_string());
-    let words: Vec<String> = init();
+    let meow: Keyboard = format_json_kle("/home/gsh/proj/ml/layout/files/corne.json".to_string());
+    // let words: Vec<String> = init();
+    let words: Vec<String> = vec![
+        "the".to_string(),
+        "quick".to_string(),
+        "brown".to_string(),
+        "fox".to_string(),
+        "jumps".to_string(),
+        "over".to_string(),
+        "the".to_string(),
+        "lazy".to_string(),
+        "dog".to_string(),
+    ];
     let mut test = Individual {
         chromosomes: meow.clone(),
         fitness: 0,
@@ -46,7 +57,10 @@ fn main() {
     println!("{:?}", test.fitness);
     test2.mutate();
     test2.init_table();
+    test2.fitness(homerow.clone(), words.clone());
+    println!("{:?}", test2.fitness);
     let mut test3 = mate(test, test2);
+    test3.init_table();
     test3.fitness(homerow, words);
     println!("{:?}", test3.fitness);
 }
@@ -55,7 +69,7 @@ fn init() -> Vec<String> {
     let mut words: Vec<String> = Vec::new();
     words.push("fart".to_string());
     let mut reader =
-        csv::Reader::from_path("/home/gsh/proj/hydraea/files/unigram_freq.csv").unwrap();
+        csv::Reader::from_path("/home/gsh/proj/ml/layout/files/unigram_freq.csv").unwrap();
     for result in reader.records() {
         words.push(result.unwrap()[0].to_string());
     }
