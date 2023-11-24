@@ -1,7 +1,6 @@
 use crate::{Key, Keyboard, Keycode};
-use rand::{random, seq::SliceRandom, Rng};
-use std::{collections::HashMap, default};
-
+use rand::Rng;
+use std::collections::HashMap;
 pub struct Population {
     pub individuals: Vec<Individual>,
     pub average_fitness: usize,
@@ -15,7 +14,7 @@ pub struct Individual {
     pub lookup_table: HashMap<Keycode, usize>,
 }
 
-pub fn new_mate(a: Individual, b: Individual) -> Individual {
+pub fn mate(a: Individual, b: Individual) -> Individual {
     // replace this with actual all_keycodes because lookup table can be potentially issued
     let all_keycodes = a.lookup_table;
     let mut missing_keycodes: Vec<Option<Keycode>> = Vec::new();
@@ -74,87 +73,14 @@ pub fn new_mate(a: Individual, b: Individual) -> Individual {
     meow
 }
 
-pub fn mate(a: Individual, b: Individual) -> Individual {
-    let all_keycodes = a.lookup_table;
-    let mut missing_keycodes: Vec<Option<Keycode>> = Vec::new();
-    let mut res_keyboard = a.chromosomes.clone();
-    for layer in 0..a.chromosomes.layers.len() {
-        for key in (a.chromosomes.layers[layer].len() / 2)..b.chromosomes.layers[layer].len() {
-            res_keyboard.layers[layer][key].value = None;
-        }
-        for key in (a.chromosomes.layers[layer].len() / 2)..b.chromosomes.layers[layer].len() {
-            if res_keyboard.layers[layer][key].value == None
-                && !(res_keyboard.layers[layer]
-                    .iter()
-                    .filter(|i| i.value == b.chromosomes.layers[layer][key].value)
-                    .count()
-                    > 1)
-            {
-                res_keyboard.layers[layer][key].value =
-                    b.chromosomes.layers[layer][key].value.clone();
-            }
-            missing_keycodes.push(b.chromosomes.layers[layer][key].value.clone());
-        }
-        for key in 0..res_keyboard.layers[layer].len() {
-            res_keyboard.layers[layer].iter().for_each(|m| {
-                if missing_keycodes.contains(&m.value) {
-                    let remove = missing_keycodes.iter().position(|f| f == &m.value).unwrap();
-                    missing_keycodes.remove(remove);
-                }
-            });
-            let mut rand = rand::thread_rng();
-            if res_keyboard.layers[layer][key].value == None {
-                let pos = rand.gen_range(0..missing_keycodes.len());
-                res_keyboard.layers[layer][key].value = missing_keycodes[pos].clone();
-                missing_keycodes.remove(pos);
-            } else if (res_keyboard.layers[layer]
-                .clone()
-                .into_iter()
-                .filter(|i| i.value == res_keyboard.layers[layer][key].value.clone())
-                .count())
-                > 1
-                && missing_keycodes.len() >= 1
-            {
-                let meow: Vec<Key> = res_keyboard.layers[layer]
-                    .clone()
-                    .into_iter()
-                    .filter_map(|i| {
-                        if i.value == res_keyboard.layers[layer][key].value.clone() {
-                            Some(i)
-                        } else {
-                            None
-                        }
-                    })
-                    .collect();
-
-                let mut positions: Vec<usize> = meow
-                    .iter()
-                    .filter_map(|i| res_keyboard.layers[layer].iter().position(|j| j.id == i.id))
-                    .collect();
-                let picked = rand.gen_range(0..positions.len());
-                positions.remove(picked);
-                positions.iter().for_each(|i| {
-                    let removed_pos = rand.gen_range(0..missing_keycodes.len());
-                    res_keyboard.layers[layer][*i].value = missing_keycodes[removed_pos].clone();
-                    missing_keycodes.remove(removed_pos);
-                })
-            }
-        }
-    }
-    let mut res = Individual {
-        chromosomes: res_keyboard,
-        fitness: 0,
-        lookup_table: HashMap::new(),
-    };
-    res.init_table();
-    res
-}
-
 pub fn distance(x1: f32, y1: f32, x2: f32, y2: f32) -> f32 {
     (((x1 - x2).powi(2) + (y1 - y2).powi(2)) as f32).sqrt()
 }
 
 impl Individual {
+    pub fn render(self) {
+        todo!()
+    }
     pub fn mutate(&mut self) {
         // this switches the keys around
         let layers = self.chromosomes.layers.len();

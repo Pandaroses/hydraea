@@ -1,6 +1,6 @@
 use layout::{
     format_json_kle,
-    genes::{new_mate, Individual},
+    genes::{mate, Individual},
     Key, Keyboard, Keycode,
 };
 use std::collections::HashMap;
@@ -55,13 +55,8 @@ fn main() {
         .to_owned();
     test.fitness(homerow.clone(), words.clone());
     println!("{:?}", test.fitness);
-    test2.mutate();
-    test2.init_table();
-    test2.fitness(homerow.clone(), words.clone());
-    println!("{:?}", test2.fitness);
-    let mut test3 = new_mate(test, test2);
-    test3.init_table();
-    test3.fitness(homerow, words);
+    let mut test3 = mate(test, test2);
+    test3.fitness(homerow.clone(), words.clone());
     println!("{:?}", test3.fitness);
 }
 
