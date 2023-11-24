@@ -1,6 +1,6 @@
 use crate::{Key, Keyboard, Keycode};
 use rand::{random, seq::SliceRandom, Rng};
-use std::collections::HashMap;
+use std::{collections::HashMap, default};
 
 pub struct Population {
     pub individuals: Vec<Individual>,
@@ -19,16 +19,59 @@ pub fn new_mate(a: Individual, b: Individual) -> Individual {
     // replace this with actual all_keycodes because lookup table can be potentially issued
     let all_keycodes = a.lookup_table;
     let mut missing_keycodes: Vec<Option<Keycode>> = Vec::new();
-    let mut res: Keyboard;
+    let mut res: Keyboard = Keyboard { layers: vec![] };
 
     for layer in 0..a.chromosomes.layers.len() {
-        let middle = a.chromosomes.layers[layer].len() / 2;
-        let res_layer = a.chromosomes.clone().layers[layer].splice(
+        let middle: usize = a.chromosomes.layers[layer].len() / 2;
+        let res_layer: &mut Vec<Key> = &mut a.chromosomes.clone().layers[layer];
+        res_layer.splice(
             ..middle,
             b.chromosomes.layers[layer][middle..].iter().cloned(),
         );
+        for key in middle..res_layer.len() {
+            let key_value = res_layer[key].value.clone();
+            let duplicates: Vec<Key> = res_layer
+                .iter()
+                .filter_map(|i| {
+                    if i.value == key_value {
+                        Some(i.to_owned())
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+            if duplicates.len() > 1 {
+                res_layer[key].value = None;
+            }
+        }
+        //add all missing keys to missing_keys
+        for (keycode, keycode_layer) in &all_keycodes {
+            if *keycode_layer == layer
+                && !res_layer
+                    .iter()
+                    .any(|key| key.value.as_ref() == Some(keycode))
+            {
+                missing_keycodes.push(Some(keycode.clone()));
+            }
+        }
+        for key in middle..res_layer.len() {
+            let key_value = res_layer[key].value.clone();
+            if key_value == None {
+                let mut rand = rand::thread_rng();
+                let pos = rand.gen_range(0..missing_keycodes.len());
+                res_layer[key].value = missing_keycodes[pos].clone();
+                missing_keycodes.remove(pos);
+            }
+        }
+        res.layers.push(res_layer.to_owned());
     }
-    todo!();
+    let mut meow = Individual {
+        chromosomes: res,
+        fitness: 0,
+        lookup_table: b.lookup_table.clone(),
+    };
+    meow.init_table();
+    meow
 }
 
 pub fn mate(a: Individual, b: Individual) -> Individual {
