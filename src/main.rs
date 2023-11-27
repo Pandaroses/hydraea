@@ -7,18 +7,18 @@ use std::collections::HashMap;
 //TODO main is not currently functional as intended, everything is hard coded
 fn main() {
     let meow: Keyboard = format_json_kle("/home/gsh/proj/ml/layout/files/corne.json".to_string());
-    // let words: Vec<String> = init();
-    let words: Vec<String> = vec![
-        "the".to_string(),
-        "quick".to_string(),
-        "brown".to_string(),
-        "fox".to_string(),
-        "jumps".to_string(),
-        "over".to_string(),
-        "the".to_string(),
-        "lazy".to_string(),
-        "dog".to_string(),
-    ];
+    let words: Vec<String> = init();
+    // let words: Vec<String> = vec![
+    //     "the".to_string(),
+    //     "quick".to_string(),
+    //     "brown".to_string(),
+    //     "fox".to_string(),
+    //     "jumps".to_string(),
+    //     "over".to_string(),
+    //     "the".to_string(),
+    //     "lazy".to_string(),
+    //     "dog".to_string(),
+    // ];
     let mut test = Individual {
         chromosomes: meow.clone(),
         fitness: 0,
@@ -55,6 +55,7 @@ fn main() {
         .to_owned();
     test.fitness(homerow.clone(), words.clone());
     println!("{:?}", test.fitness);
+    test2.mutate();
     let mut test3 = mate(test, test2);
     test3.fitness(homerow.clone(), words.clone());
     println!("{:?}", test3.fitness);

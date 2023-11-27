@@ -48,19 +48,19 @@ impl Default for Index {
 }
 pub type Layer = Vec<Key>;
 
-//RULES
-// x,y,w,h units keyboard units u
-// x,y reset each row, in row apply to every proceeding key until new overwrite
-// TODO x2, y2 i think treat as two separate keys, each having the same id
-// w,h only applies to next key
-//r stays until overwritten, even over rows, if rx,ry is specified rotate around that point r in deg rx,ry stays until overwriten aswell
-// else rotate around 0,0 for no apparent reason
-// apparently the fucking rotation is applied after the coordinate rows what the fuck
-//  e.g. you calculate the absolute coordinate of where the key is in the "row" by adding specified y or w value,
-// then you do a rotation around point rx,ry or 0,0 using
-// x' = xcos(r) - ysin(r) and y' = ycos(r) + xsin(r)
-// additionally if rx,ry are not 0,0 then you have to transform the position until origin is 0,0, then commit rotation and untransform
-// implementation, finds middle position of keycap, then rotate around point
+///RULES
+/// x,y,w,h units keyboard units u
+/// x,y reset each row, in row apply to every proceeding key until new overwrite
+/// TODO x2, y2 i think treat as two separate keys, each having the same id
+/// w,h only applies to next key
+/// r stays until overwritten, even over rows, if rx,ry is specified rotate around that point r in deg rx,ry stays until overwriten aswell
+/// else rotate around 0,0 for no apparent reason
+/// apparently the fucking rotation is applied after the coordinate rows what the fuck
+///  e.g. you calculate the absolute coordinate of where the key is in the "row" by adding specified y or w value,
+/// then you do a rotation around point rx,ry or 0,0 using
+/// x' = xcos(r) - ysin(r) and y' = ycos(r) + xsin(r)
+/// additionally if rx,ry are not 0,0 then you have to transform the position until origin is 0,0, then commit rotation and untransform
+/// implementation, finds middle position of keycap, then rotate around point
 
 pub fn format_json_kle(path: String) -> Keyboard {
     let mut keyboard: Layer = Layer::new();
