@@ -1,36 +1,30 @@
 use layout::{
     format_json_kle,
-    genes::{mate, Individual},
+    genes::{mate, Individual, Population},
     Key, Keyboard, Keycode,
 };
 use std::collections::HashMap;
 //TODO main is not currently functional as intended, everything is hard coded
 fn main() {
     let meow: Keyboard = format_json_kle("/home/gsh/proj/ml/layout/files/corne.json".to_string());
-    let words: Vec<String> = init();
-    // let words: Vec<String> = vec![
-    //     "the".to_string(),
-    //     "quick".to_string(),
-    //     "brown".to_string(),
-    //     "fox".to_string(),
-    //     "jumps".to_string(),
-    //     "over".to_string(),
-    //     "the".to_string(),
-    //     "lazy".to_string(),
-    //     "dog".to_string(),
-    // ];
+    // let words: Vec<String> = init();
+    let words: Vec<String> = vec![
+        "the".to_string(),
+        "quick".to_string(),
+        "brown".to_string(),
+        "fox".to_string(),
+        "jumps".to_string(),
+        "over".to_string(),
+        "the".to_string(),
+        "lazy".to_string(),
+        "dog".to_string(),
+    ];
     let mut test = Individual {
         chromosomes: meow.clone(),
         fitness: 0,
         lookup_table: HashMap::new(),
     };
-    let mut test2 = Individual {
-        chromosomes: meow.clone(),
-        fitness: 0,
-        lookup_table: HashMap::new(),
-    };
     test.init_table();
-    test2.init_table();
     let home = vec![
         Keycode::KC(["a".to_string(), "a".to_string()]),
         Keycode::KC(["s".to_string(), "s".to_string()]),
@@ -53,12 +47,18 @@ fn main() {
         })
         .collect::<Vec<_>>()
         .to_owned();
-    test.fitness(homerow.clone(), words.clone());
-    println!("{:?}", test.fitness);
-    test2.mutate();
-    let mut test3 = mate(test, test2);
-    test3.fitness(homerow.clone(), words.clone());
-    println!("{:?}", test3.fitness);
+    let mut pop = Population {
+        individuals: vec![test; 50],
+        average_fitness: 0,
+        best_fitness: 0,
+        generation: 0,
+        homerow,
+        wordset: words,
+    };
+    for i in 0..500 {
+        pop.next();
+    }
+    println!("best keyboard: {:?}", pop.individuals[0]);
 }
 
 fn init() -> Vec<String> {

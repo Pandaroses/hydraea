@@ -11,13 +11,15 @@
 // find cool graphing
 // potentially have a really looking tui before writing a frontend in web https://docs.rs/tui/latest/tui/index.html
 use crate::{Key, Keyboard, Keycode};
-use rand::Rng;
+use rand::{random, Rng};
 use std::collections::HashMap;
 
+///TODO rewrite distance function to give each finger bounds, determined by the user
 pub fn distance(x1: f32, y1: f32, x2: f32, y2: f32) -> f32 {
     (((x1 - x2).powi(2) + (y1 - y2).powi(2)) as f32).sqrt()
 }
 
+#[derive(Debug, Clone)]
 pub struct Individual {
     pub chromosomes: Keyboard,
     pub fitness: usize,
@@ -30,7 +32,7 @@ impl Individual {
         todo!()
     }
     /// switches around between 0 and 10 keys around on random layers and random position, needs error/validity handling
-    pub fn mutate(&mut self) {
+    pub fn mutate(&mut self) -> Individual {
         let layers = self.chromosomes.layers.len();
         let mut random = rand::thread_rng();
         let mutation_amount = random.gen_range(0..10);
@@ -45,6 +47,7 @@ impl Individual {
             self.chromosomes.layers[key2_layer][key2_pos].value = temp_key1.value;
             self.init_table();
         });
+        self.clone()
     }
     /// calculates the fitness of this Individual, is not fully-fledged as it should have many more parameters, but those are in the TODO
     pub fn fitness(&mut self, homerow: Vec<String>, wordset: Vec<String>) {
@@ -176,8 +179,6 @@ pub fn mate(a: Individual, b: Individual) -> Individual {
             }
         }
 
-        println!("{:?}", missing_keycodes);
-
         for key in middle..res_layer.len() {
             let key_value = res_layer[key].value.clone();
             if key_value == None {
@@ -203,6 +204,8 @@ pub struct Population {
     pub average_fitness: usize,
     pub best_fitness: usize,
     pub generation: usize,
+    pub homerow: Vec<String>,
+    pub wordset: Vec<String>,
 }
 
 impl Population {
@@ -211,11 +214,46 @@ impl Population {
         todo!()
     }
     /// sorts all individuals by fitness, then sets average fitness and best fitness of current population, returns the sorted list
-    pub fn eval(&mut self) -> Vec<Individual> {
-        todo!()
+    pub fn eval(&mut self) {
+        self.individuals
+            .iter_mut()
+            .for_each(|s| s.fitness(self.homerow.clone(), self.wordset.clone()));
+        self.individuals.sort_by(|a, b| a.fitness.cmp(&b.fitness));
+        self.best_fitness = self.individuals[0].fitness;
+        let mut average = 0;
+        for i in self.individuals.iter() {
+            average += i.fitness;
+        }
+        average /= self.individuals.len();
+        self.average_fitness = average;
     }
     /// initialize a population, should only be run once, will contain configs such as size of population, whether or not each individual should be randomized or based on a predeterimened keyboard layout
     pub fn init(&mut self) {}
     /// wrapper for all functions needed to ascend a generation, includes logging and potential rendering
-    pub fn next(&mut self) {}
+    pub fn next(&mut self) {
+        self.eval();
+        println!(
+            "gen {:?} best fitness: {:?}",
+            self.generation, self.best_fitness
+        );
+        println!(
+            "gen {:?} average fitness: {:?}",
+            self.generation, self.average_fitness
+        );
+        let mut mutation: Vec<Individual> = vec![self.individuals[0].clone()];
+        let mut random = rand::thread_rng();
+        for i in self.individuals.iter().cloned() {
+            let tes = self.individuals[random.gen_range(0..self.individuals.len())].clone();
+            match random.gen_range(0..2) {
+                0 => mutation.push(i.clone().mutate()),
+                1 => mutation.push(mate(i.clone(), tes)),
+                2 => mutation.push(i.clone()),
+                _ => {
+                    println!("error")
+                }
+            }
+        }
+        self.individuals = mutation;
+        self.generation += 1;
+    }
 }
