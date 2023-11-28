@@ -24,6 +24,7 @@ fn main() {
         fitness: 0,
         lookup_table: HashMap::new(),
     };
+    println!("{:?}", test.clone());
     test.init_table();
     let home = vec![
         Keycode::KC(["a".to_string(), "a".to_string()]),
