@@ -142,9 +142,9 @@ pub fn mate(a: Individual, b: Individual) -> Individual {
     let all_keycodes = a.lookup_table;
     let mut missing_keycodes: Vec<Option<Keycode>> = Vec::new();
     let mut res: Keyboard = Keyboard { layers: vec![] };
-
+    let mut rand = rand::thread_rng();
     for layer in 0..a.chromosomes.layers.len() {
-        let middle: usize = a.chromosomes.layers[layer].len() / 2;
+        let middle: usize = rand.gen_range(0..a.chromosomes.layers.len());
         let res_layer: &mut Vec<Key> = &mut a.chromosomes.clone().layers[layer];
         res_layer.splice(
             middle..,
@@ -182,7 +182,6 @@ pub fn mate(a: Individual, b: Individual) -> Individual {
         for key in middle..res_layer.len() {
             let key_value = res_layer[key].value.clone();
             if key_value == None {
-                let mut rand = rand::thread_rng();
                 let pos = rand.gen_range(0..missing_keycodes.len());
                 res_layer[key].value = missing_keycodes[pos].clone();
                 missing_keycodes.remove(pos);
@@ -241,18 +240,22 @@ impl Population {
             self.generation, self.average_fitness
         );
         let mut mutation: Vec<Individual> = vec![self.individuals[0].clone()];
+        self.individuals.remove(0);
         let mut random = rand::thread_rng();
+        for x in (self.individuals.len() / 100 * 2)..(self.individuals.len() - 1) {
+            self.individuals.remove(x);
+            self.individuals.push(mutation[0].clone());
+        }
         for i in self.individuals.iter().cloned() {
             let tes = self.individuals[random.gen_range(0..self.individuals.len())].clone();
             match random.gen_range(0..2) {
                 0 => mutation.push(i.clone().mutate()),
                 1 => mutation.push(mate(i.clone(), tes)),
                 2 => mutation.push(i.clone()),
-                _ => {
-                    println!("error")
-                }
+                _ => {}
             }
         }
+        println!("{:?}", mutation.len());
         self.individuals = mutation;
         self.generation += 1;
     }

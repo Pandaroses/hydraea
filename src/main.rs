@@ -7,24 +7,23 @@ use std::collections::HashMap;
 //TODO main is not currently functional as intended, everything is hard coded
 fn main() {
     let meow: Keyboard = format_json_kle("/home/gsh/proj/ml/layout/files/corne.json".to_string());
-    // let words: Vec<String> = init();
-    let words: Vec<String> = vec![
-        "the".to_string(),
-        "quick".to_string(),
-        "brown".to_string(),
-        "fox".to_string(),
-        "jumps".to_string(),
-        "over".to_string(),
-        "the".to_string(),
-        "lazy".to_string(),
-        "dog".to_string(),
-    ];
+    let words: Vec<String> = init();
+    // let words: Vec<String> = vec![
+    //     "the".to_string(),
+    //     "quick".to_string(),
+    //     "brown".to_string(),
+    //     "fox".to_string(),
+    //     "jumps".to_string(),
+    //     "over".to_string(),
+    //     "the".to_string(),
+    //     "lazy".to_string(),
+    //     "dog".to_string(),
+    // ];
     let mut test = Individual {
         chromosomes: meow.clone(),
         fitness: 0,
         lookup_table: HashMap::new(),
     };
-    println!("{:?}", test.clone());
     test.init_table();
     let home = vec![
         Keycode::KC(["a".to_string(), "a".to_string()]),
@@ -49,17 +48,17 @@ fn main() {
         .collect::<Vec<_>>()
         .to_owned();
     let mut pop = Population {
-        individuals: vec![test; 50],
+        individuals: vec![test; 100],
         average_fitness: 0,
         best_fitness: 0,
         generation: 0,
         homerow,
-        wordset: words,
+        wordset: words[0..5000].iter().map(|i| i.to_string()).collect(),
+        // wordset: words,
     };
-    for i in 0..500 {
+    for i in 0..1000 {
         pop.next();
     }
-    println!("best keyboard: {:?}", pop.individuals[0]);
 }
 
 fn init() -> Vec<String> {
