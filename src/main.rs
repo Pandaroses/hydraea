@@ -56,9 +56,15 @@ fn main() {
         wordset: words[0..5000].iter().map(|i| i.to_string()).collect(),
         // wordset: words,
     };
-    for i in 0..1000 {
+    for _ in 0..400 {
         pop.next();
     }
+    let winner = pop.individuals[1].clone();
+    let easier: Vec<(f32, f32, Keycode)> = winner.chromosomes.layers[0]
+        .iter()
+        .map(|s| (s.x, s.y, s.value.clone().unwrap()))
+        .collect();
+    println!("{:?}", easier);
 }
 
 fn init() -> Vec<String> {

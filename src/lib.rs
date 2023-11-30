@@ -51,7 +51,6 @@ pub type Layer = Vec<Key>;
 ///RULES
 /// x,y,w,h units keyboard units u
 /// x,y reset each row, in row apply to every proceeding key until new overwrite
-/// TODO x2, y2 i think treat as two separate keys, each having the same id
 /// w,h only applies to next key
 /// r stays until overwritten, even over rows, if rx,ry is specified rotate around that point r in deg rx,ry stays until overwriten aswell
 /// else rotate around 0,0 for no apparent reason
@@ -61,6 +60,8 @@ pub type Layer = Vec<Key>;
 /// x' = xcos(r) - ysin(r) and y' = ycos(r) + xsin(r)
 /// additionally if rx,ry are not 0,0 then you have to transform the position until origin is 0,0, then commit rotation and untransform
 /// implementation, finds middle position of keycap, then rotate around point
+
+//TODO ALL THE THINGS ARE RELATIVE FROM 0,0 REMEMBER IT GOES NEGATIVE NOT POSITIVE YOU SILLY BILLYx
 
 pub fn format_json_kle(path: String) -> Keyboard {
     let mut keyboard: Layer = Layer::new();
@@ -94,7 +95,7 @@ pub fn format_json_kle(path: String) -> Keyboard {
                     (ex, ey) = (ex - dx, -(ey - dy));
                     ex = ex * f64::cos(current.r) - ey * f64::sin(current.r);
                     ey = ey * f64::cos(current.r) + ex * f64::sin(current.r);
-                    (ex, ey) = (ex + dx, ex + dy);
+                    (ex, ey) = (ex + dx, ey + dy);
                     current.x += current.w;
                     let (ex2, ey2) = (
                         (current.x + current.x2.unwrap_or(1.0) + (current.w2.unwrap_or(1.0) / 2.0)),
@@ -119,7 +120,7 @@ pub fn format_json_kle(path: String) -> Keyboard {
                     }
                     keyboard.push(Key {
                         x: ex as f32,
-                        y: ey as f32,
+                        y: ((ey * -1.0) + 20.0) as f32,
                         id: i,
                         value: Some(Keycode::KC([
                             mrrow[r].as_str().unwrap().to_string().to_lowercase(),
