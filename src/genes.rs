@@ -100,8 +100,8 @@ impl Individual {
                     // implement looking for layer switching
                 }
             });
-            self.fitness = total_distance as usize;
         }
+        self.fitness = total_distance as usize;
     }
     /// finds the shortest distance from a list of keys to a key
     pub fn shortest_distance(

@@ -7,18 +7,18 @@ use std::collections::HashMap;
 //TODO main is not currently functional as intended, everything is hard coded
 fn main() {
     let meow: Keyboard = format_json_kle("/home/gsh/proj/ml/layout/files/corne.json".to_string());
-    let words: Vec<String> = init();
-    // let words: Vec<String> = vec![
-    //     "the".to_string(),
-    //     "quick".to_string(),
-    //     "brown".to_string(),
-    //     "fox".to_string(),
-    //     "jumps".to_string(),
-    //     "over".to_string(),
-    //     "the".to_string(),
-    //     "lazy".to_string(),
-    //     "dog".to_string(),
-    // ];
+    // let words: Vec<String> = init();
+    let words: Vec<String> = vec![
+        "the".to_string(),
+        "quick".to_string(),
+        "brown".to_string(),
+        "fox".to_string(),
+        "jumps".to_string(),
+        "over".to_string(),
+        "the".to_string(),
+        "lazy".to_string(),
+        "dog".to_string(),
+    ];
     let mut test = Individual {
         chromosomes: meow.clone(),
         fitness: 0,
@@ -47,20 +47,20 @@ fn main() {
         })
         .collect::<Vec<_>>()
         .to_owned();
-    let mut pop = Population {
-        individuals: vec![test; 100],
-        average_fitness: 0,
-        best_fitness: 0,
-        generation: 0,
-        homerow,
-        wordset: words[0..5000].iter().map(|i| i.to_string()).collect(),
-        // wordset: words,
-    };
-    for _ in 0..400 {
-        pop.next();
-    }
-    let winner = pop.individuals[1].clone();
-    let easier: Vec<(f32, f32, Keycode)> = winner.chromosomes.layers[0]
+    // let mut pop = Population {
+    //     individuals: vec![test; 1000],
+    //     average_fitness: 0,
+    //     best_fitness: 0,
+    //     generation: 0,
+    //     homerow,
+    //     // wordset: words[0..5000].iter().map(|i| i.to_string()).collect(),
+    //     wordset: words,
+    // };
+    // for _ in 0..500 {
+    //     pop.next();
+    // }
+    // let winner = pop.individuals[1].clone();
+    let easier: Vec<(f32, f32, Keycode)> = meow.layers[0] //winner.chromosomes.layers[0]
         .iter()
         .map(|s| (s.x, s.y, s.value.clone().unwrap()))
         .collect();
