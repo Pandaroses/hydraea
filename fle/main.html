@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Configuration Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(32, 1fr);
+            gap: 2px;
+            margin-bottom: 20px;
+        }
+        .key {
+            width: 30px;
+            height: 30px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .key.selected {
+            background-color: #e0e0e0;
+        }
+        #layerSelector, #downloadBtn {
+            margin-bottom: 10px;
+        }
+        #keyForm {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+        }
+        .layer-input {
+            margin-bottom: 10px;
+        }
+        .form-row {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="grid"></div>
+    <select id="layerSelector"></select>
+    <button id="downloadBtn">Download JSON</button>
+    <div id="keyForm">
+        <h3>Key Configuration</h3>
+        <div class="form-row">
+            <label for="coordX">X coordinate:</label>
+            <input type="number" id="coordX" min="0" max="31">
+            <label for="coordY">Y coordinate:</label>
+            <input type="number" id="coordY" min="0" max="5">
+        </div>
+        <div class="form-row">
+            <label for="fingerSelect">Finger:</label>
+            <select id="fingerSelect">
+                <option value="Thumb">Thumb</option>
+                <option value="Index">Index</option>
+                <option value="Middle">Middle</option>
+                <option value="Ring">Ring</option>
+                <option value="Pinky">Pinky</option>
+            </select>
+            <label for="handSelect">Hand:</label>
+            <select id="handSelect">
+                <option value="Left">Left</option>
+                <option value="Right">Right</option>
+            </select>
+            <label for="costInput">Cost:</label>
+            <input type="number" id="costInput" min="0" value="0">
+        </div>
+        <div id="layerInputs"></div>
+        <button id="applyBtn">Apply</button>
+    </div>
+
+    <script>
+        const grid = document.getElementById('grid');
+        const layerSelector = document.getElementById('layerSelector');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const keyForm = document.getElementById('keyForm');
+        const layerInputs = document.getElementById('layerInputs');
+        const applyBtn = document.getElementById('applyBtn');
+        const coordX = document.getElementById('coordX');
+        const coordY = document.getElementById('coordY');
+        const fingerSelect = document.getElementById('fingerSelect');
+        const handSelect = document.getElementById('handSelect');
+        const costInput = document.getElementById('costInput');
+
+        const GRID_WIDTH = 32;
+        const GRID_HEIGHT = 6;
+        const LAYER_COUNT = 8;
+
+        let currentLayer = 0;
+        let selectedKey = null;
+        let keyData = Array(GRID_HEIGHT).fill().map(() => 
+            Array(GRID_WIDTH).fill().map(() => ({
+                matrix: [0, 0],
+                values: Array(LAYER_COUNT).fill().map(() => ["TRANS", false]),
+                finger: "Thumb",
+                hand: "Left",
+                cost: 0
+            }))
+        );
+
+        function createGrid() {
+            grid.innerHTML = '';
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    const key = document.createElement('div');
+                    key.className = 'key';
+                    key.dataset.x = x;
+                    key.dataset.y = y;
+                    key.textContent = keyData[y][x].values[currentLayer][0];
+                    key.addEventListener('click', () => selectKey(x, y));
+                    grid.appendChild(key);
+                }
+            }
+        }
+
+        function createLayerSelector() {
+            for (let i = 0; i < LAYER_COUNT; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `Layer ${i}`;
+                layerSelector.appendChild(option);
+            }
+            layerSelector.addEventListener('change', (e) => {
+                currentLayer = parseInt(e.target.value);
+                updateGrid();
+            });
+        }
+
+        function createLayerInputs() {
+            for (let i = 0; i < LAYER_COUNT; i++) {
+                const div = document.createElement('div');
+                div.className = 'layer-input';
+                div.innerHTML = `
+                    <label for="layer${i}">Layer ${i}:</label>
+                    <input type="text" id="layer${i}" placeholder="e.g., MO(3),TRANS">
+                `;
+                layerInputs.appendChild(div);
+            }
+        }
+
+        function selectKey(x, y) {
+            if (selectedKey) {
+                selectedKey.classList.remove('selected');
+            }
+            selectedKey = grid.children[y * GRID_WIDTH + x];
+            selectedKey.classList.add('selected');
+            coordX.value = x;
+            coordY.value = y;
+            updateFormInputs(x, y);
+        }
+
+        function updateFormInputs(x, y) {
+            const key = keyData[y][x];
+            for (let i = 0; i < LAYER_COUNT; i++) {
+                document.getElementById(`layer${i}`).value = key.values[i][0];
+            }
+            fingerSelect.value = key.finger;
+            handSelect.value = key.hand;
+            costInput.value = key.cost;
+        }
+
+        function updateGrid() {
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    const key = grid.children[y * GRID_WIDTH + x];
+                    key.textContent = keyData[y][x].values[currentLayer][0];
+                }
+            }
+        }
+
+        function applyKeyConfig() {
+            const x = parseInt(coordX.value);
+            const y = parseInt(coordY.value);
+            if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                for (let i = 0; i < LAYER_COUNT; i++) {
+                    const input = document.getElementById(`layer${i}`).value;
+                    keyData[y][x].values[i] = [input || "TRANS", false];
+                }
+                keyData[y][x].matrix = [x, y];
+                keyData[y][x].finger = fingerSelect.value;
+                keyData[y][x].hand = handSelect.value;
+                keyData[y][x].cost = parseInt(costInput.value);
+                updateGrid();
+            }
+        }
+
+        function downloadJSON() {
+            const filteredKeyData = keyData.flat().filter(key => 
+                key.values.some(value => value[0] !== "TRANS")
+            );
+            const jsonString = JSON.stringify(filteredKeyData);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'key_config.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        createGrid();
+        createLayerSelector();
+        createLayerInputs();
+
+        applyBtn.addEventListener('click', applyKeyConfig);
+        downloadBtn.addEventListener('click', downloadJSON);
+    </script>
+</body>
+</html>
