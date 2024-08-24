@@ -49,52 +49,71 @@ impl Keyboard {
         for n in ngrams.iter() {
             let mut i = 0;
             let mut keys: Vec<Key> = Vec::new();
-            while i <= n.0.len() {
+            while i < n.0.len() {
                 match self.find_key(n.0[i].clone()) {
                     Some(x) => {
-                        keys.push(x);
-                        if i >= 2 {
+                        keys.push(x.clone());
+                        if i >= 1 {
                             let y_check = keys[i - 1].matrix.1 == keys[i].matrix.1;
                             let same_hand = keys[i - 1].hand == keys[i].hand;
                             let x_diff = keys[i - 1].matrix.0.abs_diff(keys[i].matrix.0) == 1;
-                            if x_diff && same_hand && y_check {
-                                continue;
+                            let layer_1: usize = x
+                                .clone()
+                                .values
+                                .iter()
+                                .enumerate()
+                                .filter_map(|m| if m.1 .0 == n.0[i] { Some(m.0) } else { None })
+                                .nth(0)
+                                .unwrap();
+                            let layer_2: usize = self
+                                .find_key(n.0[i - 1].clone())
+                                .unwrap()
+                                .clone()
+                                .values
+                                .iter()
+                                .enumerate()
+                                .filter_map(|m| {
+                                    if m.1 .0 == n.0[i - 1] {
+                                        Some(m.0)
+                                    } else {
+                                        None
+                                    }
+                                })
+                                .nth(0)
+                                .unwrap();
+                            if x_diff && same_hand && y_check && layer_1 == layer_2 {
+                                i += 1;
                             } else {
-                                i = n.0.len() + 1;
+                                i = n.0.len() + 100;
                             }
+                        } else {
+                            i += 1
                         }
                     }
                     None => {
-                        i = n.0.len() + 1;
+                        i = n.0.len() + 100;
                     }
                 };
             }
-            if keys.len() == n.0.len() {
+            if keys.len() == n.0.len()
+                && keys.len() == i
+                && (keys[0].matrix.0 as i8).abs_diff(keys[1].matrix.0 as i8) == 1
+            {
                 let roll = match keys[0].matrix.0 as i8 - keys[1].matrix.0 as i8 {
                     -1 if keys[0].hand == Hand::Left => Roll::Inwards,
                     -1 if keys[0].hand == Hand::Right => Roll::Outwards,
                     1 if keys[0].hand == Hand::Left => Roll::Outwards,
                     1 if keys[0].hand == Hand::Right => Roll::Inwards,
-
                     _ => todo!(),
                 };
                 let roll_mul = if config.roll_type == roll {
                     config.roll_multiplier
-                        + if self
-                            .default_positions
-                            .contains(&(keys[0].matrix.0, keys[0].matrix.1))
-                        {
-                            config.roll_multiplier
-                        } else {
-                            0.0
-                        }
                 } else {
                     1.0
                 };
                 ngram_fitness += n.1 as f32 * n.0.len() as f32 * roll_mul;
             }
-
-            let mut distance_fitness = usize::MAX;
+            let mut distance_fitness = 0;
             for i in bigrams.iter() {
                 let k1 = &i.0[0..1];
                 let k2 = &i.0[1..2];
@@ -104,19 +123,57 @@ impl Keyboard {
                 let second_key = self
                     .find_key(Keycode::KC([k2.to_string().clone(), k2.to_uppercase()]))
                     .unwrap();
+                let l1: usize = self
+                    .find_key(Keycode::KC([k1.to_string().clone(), k1.to_uppercase()]))
+                    .unwrap()
+                    .clone()
+                    .values
+                    .iter()
+                    .enumerate()
+                    .filter_map(|m| {
+                        if m.1 .0 == Keycode::KC([k1.to_string().clone(), k1.to_uppercase()]) {
+                            Some(m.0)
+                        } else {
+                            None
+                        }
+                    })
+                    .nth(0)
+                    .unwrap();
+                let l2: usize = self
+                    .find_key(Keycode::KC([k1.to_string().clone(), k1.to_uppercase()]))
+                    .unwrap()
+                    .clone()
+                    .values
+                    .iter()
+                    .enumerate()
+                    .filter_map(|m| {
+                        if m.1 .0 == Keycode::KC([k1.to_string().clone(), k1.to_uppercase()]) {
+                            Some(m.0)
+                        } else {
+                            None
+                        }
+                    })
+                    .nth(0)
+                    .unwrap();
+
+                if l1 != l2 {
+                    distance_fitness += u64::MAX as usize;
+                }
+
                 if first_key.hand == second_key.hand {
                     if first_key.finger == second_key.finger {
-                        distance_fitness -= first_key.cost * second_key.cost * i.1;
+                        distance_fitness += first_key.cost * second_key.cost * i.1;
                     } else {
-                        distance_fitness -= (first_key.cost + second_key.cost) * i.1;
+                        distance_fitness += (first_key.cost + second_key.cost) * i.1;
                     }
                 } else {
-                    distance_fitness -= (first_key.cost + second_key.cost) * i.1;
+                    distance_fitness += (first_key.cost + second_key.cost) * i.1;
                 }
             }
-            distance_fitness = ((-0.2 * distance_fitness as f64).exp() * 100000.0) as usize;
-            self.fitness =
-                (ngram_fitness * config.ngram_multiplier + distance_fitness as f32) as usize;
+
+            self.fitness = (ngram_fitness * config.ngram_multiplier) as usize
+                + ((1.0 / (distance_fitness as f32 / 1000000000000.0)).powf(2.0) * 2000000.0)
+                    as usize
         }
     }
 
@@ -132,37 +189,29 @@ impl Keyboard {
     }
     pub async fn mutate(&mut self) {
         let mut rander = rand::thread_rng();
-        let amount = rander.gen_range(1..10);
-        let mut key_1 = (0, 0);
-        let mut key_2 = (0, 0);
-        for _i in 0..amount {
-            let mut x = true;
-            while x == true {
-                let layer_1 = rander.gen_range(0..self.keys[0].values.len());
-                let layer_2 = rander.gen_range(0..self.keys[0].values.len());
-                if !(layer_1 == 1 || layer_2 == 1) {
-                    let size = self.keys.len();
-                    let index_1 = rander.gen_range(0..size);
-                    let index_2 = rander.gen_range(0..size);
-                    let temp_key_1 = self.keys[index_1].values[layer_1].clone();
-                    let temp_key_2 = self.keys[index_2].values[layer_2].clone();
-                    match (temp_key_1.0, temp_key_2.0, (temp_key_1.1 || temp_key_2.1)) {
-                        (Keycode::KC(_), Keycode::KC(_), false) => {
-                            x = false;
-                            key_1 = (index_1, layer_1);
-                            key_2 = (index_2, layer_2)
-                        }
-                        _ => continue,
-                    };
+        let amount = rander.gen_range(1..self.keys.len());
+        for _ in 0..amount {
+            let size = self.keys.len();
+            let index_1 = rander.gen_range(0..size);
+            let index_2 = rander.gen_range(0..size);
+            let layer_1 = rander.gen_range(0..self.keys[index_1].values.len());
+            let layer_2 = rander.gen_range(0..self.keys[index_2].values.len());
+
+            // Only swap if both keys are KC and not modified
+            if let (Keycode::KC([_, _]), false) = (
+                self.keys[index_1].values[layer_1].0.clone(),
+                self.keys[index_1].values[layer_1].1,
+            ) {
+                if let (Keycode::KC([_, _]), false) = (
+                    self.keys[index_2].values[layer_2].0.clone(),
+                    self.keys[index_2].values[layer_2].1,
+                ) {
+                    // Swap the keycodes
+                    let temp = self.keys[index_1].values[layer_1].clone();
+                    self.keys[index_1].values[layer_1] = self.keys[index_2].values[layer_2].clone();
+                    self.keys[index_2].values[layer_2] = temp;
                 }
             }
-            let mut values_1 = self.keys[key_1.0].values.clone();
-            let mut values_2 = self.keys[key_2.0].values.clone();
-            let buf_value = values_2[key_2.1].clone();
-            values_2[key_2.1] = values_1[key_1.1].clone();
-            values_1[key_1.1] = buf_value;
-            self.keys[key_1.0].values = values_1;
-            self.keys[key_2.0].values = values_2;
         }
     }
     pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
@@ -192,7 +241,16 @@ impl Keyboard {
 
     pub async fn mate(&mut self, other: Keyboard) {
         let mut buf_keyboard: Keyboard = Keyboard {
-            keys: Vec::new(),
+            keys: vec![
+                Key {
+                    matrix: (0, 0),
+                    values: self.keys[0].values.clone(),
+                    finger: Finger::Thumb,
+                    hand: Hand::Left,
+                    cost: 1,
+                };
+                self.keys.len()
+            ],
             default_positions: self.default_positions.clone(),
             fitness: 0,
         };
@@ -233,9 +291,11 @@ impl Keyboard {
             })
             .flatten()
             .collect();
-        for i in 0..missing_indexes.len() {
-            buf_keyboard.keys[missing_indexes[i].0].values[missing_indexes[i].1] =
-                self.keys[missing_keys[i].0].values[missing_keys[i].1].clone()
+        if missing_keys.len() > 0 {
+            for i in 0..missing_indexes.len() {
+                buf_keyboard.keys[missing_indexes[i].0].values[missing_indexes[i].1] =
+                    self.keys[missing_keys[i].0].values[missing_keys[i].1].clone()
+            }
         }
     }
 }

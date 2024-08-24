@@ -20,7 +20,7 @@ impl Population {
     pub async fn eval(&mut self) {
         let futures = self
             .keyboards
-            .iter_mut()
+            .par_iter_mut()
             .map(|k| {
                 let ngrams = self.ngrams.clone();
                 let config = self.config.clone();
@@ -35,6 +35,7 @@ impl Population {
         join_all(futures).await;
 
         self.keyboards.sort_by(|a, b| a.fitness.cmp(&b.fitness));
+        self.keyboards.reverse();
         self.average_fitness =
             self.keyboards.par_iter().map(|k| k.fitness).sum::<usize>() / self.keyboards.len();
         self.best_fitness = self.keyboards[0].fitness;
@@ -61,8 +62,10 @@ impl Population {
                 }
                 3 => {
                     if i / len * 100 > 10 {
+                        self.keyboards[i] = self.keyboards[i].clone()
                     } else {
-                        self.keyboards[i] = self.keyboards[0].clone()
+                        self.keyboards[i] = self.keyboards[0].clone();
+                        self.keyboards[i].mutate().await;
                     }
                 }
                 _ => {}
@@ -73,7 +76,6 @@ impl Population {
     }
 
     pub async fn output(&mut self) {
-        println!("{:?}", ["="; 100]);
         println!("GENERATION FINISHED");
         println!("best fitness: {}", self.best_fitness);
         //(u8,u8,u8) : x,y,layer
@@ -100,7 +102,13 @@ impl Population {
                 for x in 0..max_dimensions.0 {
                     top += "-----";
                     let meow = match keys.get(&(x, y, i as u8)) {
-                        Some(e) => &format!("{:?}", e)[0..2].to_string(),
+                        Some(e) => {
+                            let meow = match e {
+                                Keycode::KC([a, _]) => a.to_string(),
+                                _ => "   ".to_string(),
+                            };
+                            &format!("{:?}    ", meow)[0..2]
+                        }
                         None => "   ",
                     };
                     bottom += "-----";
@@ -111,6 +119,5 @@ impl Population {
                 println!("{}", bottom);
             }
         }
-        println!("{:?}", ["="; 100]);
     }
 }
